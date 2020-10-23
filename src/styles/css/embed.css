@@ -1,0 +1,104 @@
+@import url("https://fonts.googleapis.com/css2?family=Questrial&display=swap");
+.details {
+  height: 100%;
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+.details #event-title {
+  font-size: 25px;
+  margin-top: 3rem;
+  font-weight: bold;
+  color: #d2004a;
+}
+
+.details .details-subcontainer {
+  margin-top: 3rem;
+  border: 2px solid #e2cfd5;
+  border-radius: 5px;
+  width: 300px;
+  height: auto;
+}
+
+.details .details-subcontainer #title-div {
+  border-bottom: 2px #e2cfd5;
+  background-color: #f3edef;
+  height: 50px;
+}
+
+.details .details-subcontainer #title-div #title {
+  color: #a98592;
+  font-weight: bold;
+}
+
+.details .details-subcontainer p {
+  color: #a98592;
+}
+
+.details .details-subcontainer p a {
+  margin-left: 0.3rem;
+}
+
+.details .details-subcontainer p a i {
+  color: #5b2739;
+}
+
+.details .details-subcontainer div {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 0.5rem;
+}
+
+.details .details-subcontainer div span {
+  font-weight: bold;
+  font-size: 18px;
+  color: #a98592;
+}
+
+.details .details-subcontainer #price-values {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+}
+
+.details .details-subcontainer #price-values div {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+  padding: 0;
+}
+/*# sourceMappingURL=embed.css.map */

@@ -52,11 +52,6 @@ function App() {
 
     return (
         <div className='main'>
-            <h2>PreGov</h2>
-            <p id='title-helper'>
-                Know the impact of your governance decisions before you make
-                them
-            </p>
             <Router>
                 <Switch>
                     <Route path='/' exact>
