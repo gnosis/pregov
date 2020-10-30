@@ -11,6 +11,19 @@ const client = new ApolloClient({
   cache: new InMemoryCache()
 });
 
+const requireFile = require.context(
+  '@snapshot-labs/snapshot-spaces/skins/',
+  true,
+  /[\w-]+\.scss$/
+);
+
+requireFile.keys().map(file => requireFile(file));
+
+requireFile
+  .keys()
+  .map(file => file.replace('./', '').replace('.scss', ''));
+
+
 ReactDOM.render(
   <ApolloProvider client={client}>
     <App />
