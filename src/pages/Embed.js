@@ -45,6 +45,7 @@ const Embed = () => {
     const [loading, setLoading] = useState(true);
     const [priceYes, setPriceYes] = useState(0);
     const [priceNo, setPriceNo] = useState(0);
+    const [url, setUrl] = useState('')
 
     const fetchInstanceInfo = async () => {
         let results = []
@@ -103,6 +104,11 @@ const Embed = () => {
     useEffect(() => {
         fetchInstanceInfo();
         // eslint-disable-next-line react-hooks/exhaustive-deps
+        const fullPath = window.location.search.substring(1);
+        const qArray = fullPath.split('=');
+        if (qArray[0] === 'space') {
+          setUrl(qArray[1])
+        }
     }, []);
 
     return !loading ? (

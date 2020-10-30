@@ -47,11 +47,10 @@ const OMEN_QUERY = gql`
 
 
 function App() {
-
-
-
+    // TODO need to useEffect to grab the space.skin
     return (
-        <div className='main'>
+        // TODO add the space.skin as a class here to override the root or #main css variables - var(--var-name) in App.css
+        <div id="main" className='main'>
             <Router>
                 <Switch>
                     <Route path='/' exact>

@@ -17,7 +17,7 @@
       -ms-flex-pack: center;
           justify-content: center;
   font-family: "Questrial", sans-serif;
-  color: gray;
+  color: var(--text-color)
 }
 
 .home #create-instance {
@@ -25,10 +25,10 @@
   border: none;
   padding: 0.7rem;
   font-family: "Questrial", sans-serif;
-  border: 1px solid gray;
+  border: 1px solid var(--border-color);
   border-radius: 5px;
   margin-bottom: 1.5rem;
-  color: gray;
+  color: var(--text-color)
 }
 
 .home #create-instance:hover {
@@ -72,7 +72,7 @@
 .create div input {
   height: 30px;
   font-family: "Questrial", sans-serif;
-  color: gray;
+  color: var(--text-color)
 }
 
 .create button {
@@ -81,11 +81,11 @@
   border: none;
   padding: 0.7rem;
   font-family: "Questrial", sans-serif;
-  border: 1px solid gray;
+  border: 1px solid var(--border-color);
   border-radius: 5px;
   margin-bottom: 1.5rem;
   margin-top: 1rem;
-  color: gray;
+  color: var(--text-color)
 }
 
 .create button:hover {

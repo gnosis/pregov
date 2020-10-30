@@ -1,4 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Questrial&display=swap");
+
+:root {
+  --primary-color: #384aff;
+  --bg-color: white;
+  --text-color: #586069;
+  --link-color: #111111;
+  --heading-color: #111111;
+  --border-color: #d1d5da;
+  --header-bg: white;
+  --block-bg: transparent;
+}
+
 .details {
   height: 100%;
   width: 100%;
@@ -21,30 +33,34 @@
   font-size: 25px;
   margin-top: 3rem;
   font-weight: bold;
-  color: #d2004a;
+  color: var(--text-color);
 }
 
 .details .details-subcontainer {
   margin-top: 3rem;
-  border: 2px solid #e2cfd5;
+  border: 2px solid var(--border-color);
   border-radius: 5px;
   width: 300px;
   height: auto;
 }
 
 .details .details-subcontainer #title-div {
-  border-bottom: 2px #e2cfd5;
-  background-color: #f3edef;
+  border-bottom: 2px var(--border-color);
+  background-color: var(--bg-color);
   height: 50px;
 }
 
 .details .details-subcontainer #title-div #title {
-  color: #a98592;
+  color: var(--text-color);
   font-weight: bold;
 }
 
+.details .details-subcontainer .details-body {
+  background-color: var(--block-bg);
+}
+
 .details .details-subcontainer p {
-  color: #a98592;
+  color: var(--text-color);
 }
 
 .details .details-subcontainer p a {
@@ -52,7 +68,7 @@
 }
 
 .details .details-subcontainer p a i {
-  color: #5b2739;
+  color: var(--link-color);
 }
 
 .details .details-subcontainer div {
@@ -75,7 +91,7 @@
 .details .details-subcontainer div span {
   font-weight: bold;
   font-size: 18px;
-  color: #a98592;
+  color: var(--text-color);
 }
 
 .details .details-subcontainer #price-values {
