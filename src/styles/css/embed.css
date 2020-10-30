@@ -37,8 +37,8 @@
 }
 
 .details .details-subcontainer {
-  margin-top: 3rem;
-  border: 2px solid var(--border-color);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
   border-radius: 5px;
   width: 300px;
   height: auto;

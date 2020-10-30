@@ -5,7 +5,7 @@ import { gql } from 'apollo-boost'
 import { withRouter } from "react-router-dom";
 
 import Error from '../components/Error.js'
-import "../styles/css/embed.css";
+import "../styles/scss/embed.scss";
 
 const MAX_QUERY_AMOUNT = 20
 
@@ -112,7 +112,7 @@ const Embed = () => {
     }, []);
 
     return !loading ? (
-        <div className='details'>
+        <div className={`details ${url}`}>
           
             <Query
                query={query}
