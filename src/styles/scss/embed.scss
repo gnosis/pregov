@@ -1,39 +1,27 @@
 @import url("https://fonts.googleapis.com/css2?family=Questrial&display=swap");
 
+@import '../../styles.scss';  
+
 @font-face {
-    font-family: 'Calibre-Medium';
-    src: url('../../assets/fonts/Calibre-Medium.eot');
-    src: url('../../assets/fonts/Calibre-Medium.eot?#iefix')
-        format('embedded-opentype'),
-      url('../../assets/fonts/Calibre-Medium.woff') format('woff'),
-      url('../../assets/fonts/Calibre-Medium.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-  }
+  font-family: 'Calibre-Medium';
+  src: url('../../assets/fonts/Calibre-Medium.eot');
+  src: url('../../assets/fonts/Calibre-Medium.eot?#iefix')
+      format('embedded-opentype'),
+    url('../../assets/fonts/Calibre-Medium.woff') format('woff'),
+    url('../../assets/fonts/Calibre-Medium.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
   
-  @font-face {
-    font-family: 'Calibre-Semibold';
-    src: url('../../assets/fonts/Calibre-Semibold.eot');
-    src: url('../../assets/fonts/Calibre-Semibold.eot?#iefix')
-        format('embedded-opentype'),
-      url('../../assets/fonts/Calibre-Semibold.woff') format('woff'),
-      url('../../assets/fonts/Calibre-Semibold.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-  }
-
-$font-weight-normal: 'Calibre-Medium', -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
-$font-weight-bold: 'Calibre-Semibold', -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
-
-:root {
-  --primary-color: #384aff;
-  --bg-color: white;
-  --text-color: #586069;
-  --link-color: #111111;
-  --heading-color: #111111;
-  --border-color: #d1d5da;
-  --header-bg: white;
-  --block-bg: transparent;
+@font-face {
+  font-family: 'Calibre-Semibold';
+  src: url('../../assets/fonts/Calibre-Semibold.eot');
+  src: url('../../assets/fonts/Calibre-Semibold.eot?#iefix')
+      format('embedded-opentype'),
+    url('../../assets/fonts/Calibre-Semibold.woff') format('woff'),
+    url('../../assets/fonts/Calibre-Semibold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
 }
 
 .details {
