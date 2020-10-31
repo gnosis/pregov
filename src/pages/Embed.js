@@ -4,7 +4,7 @@ import { Query } from 'react-apollo'
 import { gql } from 'apollo-boost'
 import { withRouter } from "react-router-dom";
 
-import Error from '../components/Error.js'
+import Error from '../components/Error.js';
 import "../styles/scss/embed.scss";
 
 const MAX_QUERY_AMOUNT = 20
@@ -112,70 +112,75 @@ const Embed = () => {
     }, []);
 
     return !loading ? (
-        <div className={`details ${url}`}>
-          
-            <Query
-               query={query}
-               variables={{
-                 id,
-                 where: {},
-                 orderBy: orderBy,
-                 first: MAX_QUERY_AMOUNT,
-               }}
-             >
-               {({ data, error, loading }) => {
-                 console.log('data query omen', data, error, loading);
-                 return loading ? (
-                   <p>Loading..</p>
-                 ) : error ? (
-                   <Error error={error} />
-                 ) : (
-                   <>
-                      {/* <p id="event-title">
-                          {`Event: ${data.question.title}`}
-                      </p> */}
-                    <div className='details-subcontainer'>
-                      <div id="title-div">
-                          <p id="title">Predicted Impact</p>
-                      </div>
-                      <div>
-                          <p>Predicted Price Impact:</p>
-                          <span>
-                              {predictPriceImpact()*100}%
-                          </span>
-                      </div>
-                      <div>
-                        <p>Project Token price if "Yes":</p>
-                        <span>${predictPrice(0,data.question.conditions[0].fixedProductMarketMakers[0].outcomeTokenMarginalPrices, data.question.conditions[0].fixedProductMarketMakers[1].outcomeTokenMarginalPrices)}</span>
-                      </div>
-                      <div>
-                          <p>Project Token price if "No":</p>
-                          <span>${predictPrice(1,data.question.conditions[0].fixedProductMarketMakers[0].outcomeTokenMarginalPrices, data.question.conditions[0].fixedProductMarketMakers[1].outcomeTokenMarginalPrices)}</span>
-                      </div>
-                        <div id="price-values">
-                          <p>Markets</p>
-                          <div>
-                            <p>
-                                {token1Info ? token1Info.name : ''}
-                                <a href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[0].id}`}>
-                                    <i className='fas fa-external-link-alt'></i>
-                                </a>
-                            </p>
-                            <p>
-                                {token1Info ? token2Info.name : ''}
-                                <a href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[1].id}`}>
-                                    <i className='fas fa-external-link-alt'></i>
-                                </a>
-                            </p>   
-                          </div>
-                        </div>                  
-                      </div>
-                    </>
-                )}}
-            </Query>
-        </div>
+      <div id="app" className={`details ${url} width-full height-full`}>
+        <Query
+          query={query}
+          variables={{
+            id,
+            where: {},
+            orderBy: orderBy,
+            first: MAX_QUERY_AMOUNT,
+          }}
+        >
+          {({ data, error, loading }) => {
+            console.log('data query omen', data, error, loading);
+            return loading ? (
+              <p>Loading..</p>
+            ) : error ? (
+              <Error error={error} />
+            ) : (
+              <>
+                <h4 className="px-4 pt-3 border-bottom d-block bg-gray-dark rounded-top-0 rounded-md-top-2 width-full pb-3">
+                  Predicted Impact
+                </h4>
+                <div className="p-4 width-full block-bg">
+                  <div>
+                    <div className="text-white mb-1">
+                      <span className="mr-1">Predicted Price Impact:</span>
+                      <span className="float-right">{predictPriceImpact()*100}%</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-1">
+                      <b>Project Token price if "Yes":</b>
+                      <span className="float-right text-white">
+                        ${predictPrice(0,data.question.conditions[0].fixedProductMarketMakers[0].outcomeTokenMarginalPrices, data.question.conditions[0].fixedProductMarketMakers[1].outcomeTokenMarginalPrices)}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-1">
+                      <b>Project Token price if "No":</b>
+                      <span className="float-right text-white">
+                        ${predictPrice(1,data.question.conditions[0].fixedProductMarketMakers[0].outcomeTokenMarginalPrices, data.question.conditions[0].fixedProductMarketMakers[1].outcomeTokenMarginalPrices)}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mb-1">
+                      <b>{token1Info ? token1Info.name : ''} Market</b>
+                      <span className="float-right text-white">
+                        <a href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[0].id}`}>
+                          <i className='fas fa-external-link-alt'></i>
+                        </a>
+                      </span>
+                    </div>
+                    <div className="mb-1">
+                      <b>{token1Info ? token2Info.name : ''} Market</b>
+                      <span className="float-right text-white">
+                        <a href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[1].id}`}>
+                          <i className='fas fa-external-link-alt'></i>
+                        </a>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}}
+        </Query>
+      </div>
     ) : (
-        <p>Loading..</p>
+      <p>Loading..</p>
     );
 };
 
