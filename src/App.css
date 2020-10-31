@@ -1,26 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Questrial&display=swap");
 
-/* 
-  default colors from snapshots repo
-  if the space does not have a set skin, the defaults funnel through.
-  https://github.com/x5engine/snapshot/blob/master/src/style.scss#L5-L14
-
-  TODO we might also want to improt the snapshot/blob/master/src/vars.scss file
-  TODO to truly match the snapshot styling, we might want to base our helpers on @primer/css - githubs css utility library then mimic the structure of the 'Results' and 'Information' blocks.
-*/
-#main {
-  --primary-color: #384aff;
-  --bg-color: white;
-  --text-color: #586069;
-  --link-color: #111111;
-  --heading-color: #111111;
-  --border-color: #d1d5da;
-  --header-bg: white;
-  --block-bg: transparent;
-}
-
 .main {
-    height: 100vh;
     width: 100vw;
     display: flex;
     flex-direction: column;
