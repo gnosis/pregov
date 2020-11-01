@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
+import './helpers/skins';
+import './styles.scss'
 import App from "./App";
 import ApolloClient, { InMemoryCache } from 'apollo-boost'
 // import { ApolloProvider } from '@apollo/react-hooks';

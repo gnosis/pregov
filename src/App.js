@@ -47,9 +47,6 @@ const OMEN_QUERY = gql`
 
 
 function App() {
-
-
-
     return (
         <div className='main'>
             <Router>

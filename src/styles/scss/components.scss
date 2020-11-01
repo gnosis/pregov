@@ -7,16 +7,16 @@
     justify-content: space-between;
     width: 70%;
     padding: 0.5rem;
-    border: 1px solid gray;
+    border: 1px solid var(--border-color);
     margin: 0.3rem;
     button {
         background: none;
         border: none;
         padding: 0.7rem;
         font-family: "Questrial", sans-serif;
-        border: 1px solid gray;
+        border: 1px solid var(--border-color);
         border-radius: 5px;
-        color: gray;
+        color: var(--text-color);
     }
     button:hover {
         cursor: pointer;

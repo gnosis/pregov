@@ -1,13 +1,28 @@
 @import url("https://fonts.googleapis.com/css2?family=Questrial&display=swap");
 
-$font-style: "Questrial", sans-serif;
+@import '../../styles.scss';  
 
-$primary-color: #d2004a;
-$bg-color: #efe7ea;
-$text-color: #a98592;
-$link-color: #5b2739;
-$border-color: #e2cfd5;
-$header-bg: #f3edef;
+@font-face {
+  font-family: 'Calibre-Medium';
+  src: url('../../assets/fonts/Calibre-Medium.eot');
+  src: url('../../assets/fonts/Calibre-Medium.eot?#iefix')
+      format('embedded-opentype'),
+    url('../../assets/fonts/Calibre-Medium.woff') format('woff'),
+    url('../../assets/fonts/Calibre-Medium.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+  
+@font-face {
+  font-family: 'Calibre-Semibold';
+  src: url('../../assets/fonts/Calibre-Semibold.eot');
+  src: url('../../assets/fonts/Calibre-Semibold.eot?#iefix')
+      format('embedded-opentype'),
+    url('../../assets/fonts/Calibre-Semibold.woff') format('woff'),
+    url('../../assets/fonts/Calibre-Semibold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 .details {
     height: 100%;
@@ -20,29 +35,39 @@ $header-bg: #f3edef;
         font-size: 25px;
         margin-top: 3rem;
         font-weight: bold;
-        color: $primary-color;
+        color: var(--primary-color);
     }
     .details-subcontainer {
-        margin-top: 3rem;
-        border: 2px solid $border-color;
-        border-radius: 5px;
-        width: 300px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        width: 320px;
         height: auto;
+        overflow: hidden;
+        background-color: var(--block-bg);
         #title-div {
-            border-bottom: 2px $border-color;
-            background-color: $header-bg;
-            height: 50px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--header-bg);
+            background-color: var(--header-bg);
+            height: 60px;
             #title {
-                color: $text-color;
+                font-size: 20px;
+                color: var(--heading-color);
+                font-family: $font-weight-bold;
                 font-weight: bold;
+                padding-top: 12px;
             }
         }
+        .details-body {
+          background-color: var(--block-bg);
+        }
         p {
-            color: $text-color;
+            font-size: 18px;
+            font-family: $font-weight-normal;
+            color: var(--text-color);
             a {
                 margin-left: 0.3rem;
                 i {
-                    color: $link-color;
+                    color: var(--link-color);
                 }
             }
         }
@@ -53,9 +78,9 @@ $header-bg: #f3edef;
             align-items: center;
             padding: 0.5rem;
             span {
-                font-weight: bold;
                 font-size: 18px;
-                color: $text-color;
+                color: var(--heading-color);
+                font-family: $font-weight-normal;
             }
         }
         #price-values {
