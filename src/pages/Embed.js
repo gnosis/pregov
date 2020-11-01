@@ -130,7 +130,7 @@ const Embed = () => {
               <Error error={error} />
             ) : (
               <>
-                <h4 className="px-4 pt-3 border-bottom d-block bg-gray-dark rounded-top-0 rounded-md-top-2 width-full pb-3">
+                <h4 className="px-4 pt-3 border-bottom d-block bg-gray-dark rounded-top-0 rounded-md-top-2 width-full" style={{paddingBottom: '12px'}}>
                   Predicted Impact
                 </h4>
                 <div className="p-4 width-full block-bg">
