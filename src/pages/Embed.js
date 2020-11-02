@@ -160,7 +160,7 @@ const Embed = () => {
                     <div className="mb-1">
                       <b>{token1Info ? token1Info.name : ''} Market</b>
                       <span className="float-right text-white">
-                        <a href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[0].id}`}>
+                        <a target="_blank" href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[0].id}`}>
                           <i className='fas fa-external-link-alt'></i>
                         </a>
                       </span>
@@ -168,7 +168,7 @@ const Embed = () => {
                     <div className="mb-1">
                       <b>{token1Info ? token2Info.name : ''} Market</b>
                       <span className="float-right text-white">
-                        <a href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[1].id}`}>
+                        <a target="_blank" href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[1].id}`}>
                           <i className='fas fa-external-link-alt'></i>
                         </a>
                       </span>
