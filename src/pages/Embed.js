@@ -142,7 +142,7 @@ const Embed = () => {
                   </div>
                   <div>
                     <div className="mb-1">
-                      <b>Project Token price if "Yes":</b>
+                      <b>{token1Info ? token1Info.name : ''} price if "Yes":</b>
                       <span className="float-right text-white">
                         ${predictPrice(0,data.question.conditions[0].fixedProductMarketMakers[0].outcomeTokenMarginalPrices, data.question.conditions[0].fixedProductMarketMakers[1].outcomeTokenMarginalPrices)}
                       </span>
@@ -150,7 +150,7 @@ const Embed = () => {
                   </div>
                   <div>
                     <div className="mb-1">
-                      <b>Project Token price if "No":</b>
+                      <b>{token1Info ? token1Info.name : ''} price if "No":</b>
                       <span className="float-right text-white">
                         ${predictPrice(1,data.question.conditions[0].fixedProductMarketMakers[0].outcomeTokenMarginalPrices, data.question.conditions[0].fixedProductMarketMakers[1].outcomeTokenMarginalPrices)}
                       </span>
