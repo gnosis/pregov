@@ -9,7 +9,7 @@ import "../styles/scss/embed.scss";
 
 const MAX_QUERY_AMOUNT = 20
 
-const GNOSIS_SAFE_QUERY = gql`
+const OMEN_SUBGRAPH_QUERY = gql`
   query question($id: String!) {
       question(id: $id) {
     id
@@ -37,39 +37,12 @@ const GNOSIS_SAFE_QUERY = gql`
 
 const Embed = () => {
     const { id, token1, token2 } = useParams();
-    const [instanceInfo, setInfo] = useState([]);
-    const [orderBy, setOrderBy] = useState('timeCreated');
-    const [query, setQuery] = useState(GNOSIS_SAFE_QUERY);
     const [token1Info, setToken1Info] = useState(null);
     const [token2Info, setToken2Info] = useState(null);
     const [loading, setLoading] = useState(true);
     const [priceYes, setPriceYes] = useState(0);
     const [priceNo, setPriceNo] = useState(0);
     const [url, setUrl] = useState('')
-
-    const fetchInstanceInfo = async () => {
-        let results = []
-        console.log('question id', id, 'token1', token1, 'token2',token2);
-        // let results = await fetch(`http://localhost:8000/instances?id=${id}`);
-        // results = await results.json();
-        setInfo(results);
-        if(token1 && token2) fetchTokenInfo()
-    };
-
-    const fetchTokenInfo = async () => {
-        let results = []
-        console.log('question id', id, 'token1', token1, 'token2',token2);
-        // https://api.ethplorer.io/getTokenInfo/0xb5a5f22694352c15b00323844ad545abb2b11028?apiKey=freekey
-        // let results = await fetch(`http://localhost:8000/token?address=${token1}`);
-        let result1 = await fetch(`https://api.ethplorer.io/getTokenInfo/${token1}?apiKey=freekey`, {mode: 'cors'})
-        result1 = await result1.json()
-        setToken1Info(result1)
-        let result2 = await fetch(`https://api.ethplorer.io/getTokenInfo/${token2}?apiKey=freekey`, {mode: 'cors'})
-        result2 = await result2.json()
-        setToken2Info(result2)
-        console.log(result1,result2,token1Info,token2Info);
-        setLoading(false)
-    };
 
     const predictPriceImpact = () => {
       console.log('priceYes no', priceYes, priceNo);
@@ -83,42 +56,56 @@ const Embed = () => {
 
     const predictPrice = ( index, outcomeT1, outcomeT2 ) => {
       console.log('outcomeT1', outcomeT1, outcomeT2);
-      if(index==0 && !!priceYes ){
+      if(index===0 && !!priceYes ){
         return priceYes.toFixed(2)
       }
 
-      if(index==1 && !!priceNo){
+      if(index===1 && !!priceNo){
         return priceNo.toFixed(2)
       }
 
       const govTokenPrice = token1Info.price.rate;
       const result = govTokenPrice * outcomeT1[index]/outcomeT2[index]
-      console.log('result if '+(index==0?'yes':'no'),result);
+      console.log('result if '+(index===0?'yes':'no'),result);
       // return 'price'
-      if(index==1) setPriceNo(result)
+      if(index===1) setPriceNo(result)
       else setPriceYes(result)
 
       return result.toFixed(2);
     }
 
     useEffect(() => {
-        fetchInstanceInfo();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const fetchTokenInfo = async () => {
+          console.log('question id', id, 'token1', token1, 'token2',token2);
+          let result1 = await fetch(`https://api.ethplorer.io/getTokenInfo/${token1}?apiKey=freekey`, {mode: 'cors'})
+          result1 = await result1.json()
+          setToken1Info(result1)
+          let result2 = await fetch(`https://api.ethplorer.io/getTokenInfo/${token2}?apiKey=freekey`, {mode: 'cors'})
+          result2 = await result2.json()
+          setToken2Info(result2)
+          console.log(result1, result2, token1Info, token2Info);
+          setLoading(false);
+        };
+
+        console.log('question id', id, 'token1', token1, 'token2',token2);
+        if(token1 && token2) {
+          fetchTokenInfo();
+        }
         const fullPath = window.location.search.substring(1);
         const qArray = fullPath.split('=');
         if (qArray[0] === 'space') {
           setUrl(qArray[1])
         }
-    }, []);
+    }, [id, token1, token2, token1Info, token2Info]);
 
     return !loading ? (
       <div id="app" className={`details ${url} width-full height-full`}>
         <Query
-          query={query}
+          query={OMEN_SUBGRAPH_QUERY}
           variables={{
             id,
             where: {},
-            orderBy: orderBy,
+            orderBy: 'timeCreated',
             first: MAX_QUERY_AMOUNT,
           }}
         >
@@ -160,7 +147,7 @@ const Embed = () => {
                     <div className="mb-1">
                       <b>{token1Info ? token1Info.name : ''} Market</b>
                       <span className="float-right text-white">
-                        <a target="_blank" href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[0].id}`}>
+                        <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[0].id}`}>
                           <i className='fas fa-external-link-alt'></i>
                         </a>
                       </span>
@@ -168,7 +155,7 @@ const Embed = () => {
                     <div className="mb-1">
                       <b>{token1Info ? token2Info.name : ''} Market</b>
                       <span className="float-right text-white">
-                        <a target="_blank" href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[1].id}`}>
+                        <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[1].id}`}>
                           <i className='fas fa-external-link-alt'></i>
                         </a>
                       </span>
