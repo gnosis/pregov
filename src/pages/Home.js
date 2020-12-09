@@ -20,7 +20,7 @@ const Home = (props) => {
 
     return (
         <>
-            <h2>PreGov</h2>
+            <h2>Gnosis Impact</h2>
                 <p id='title-helper'>
                     Know the impact of your governance decisions before you make
                     them
@@ -32,7 +32,7 @@ const Home = (props) => {
                         props.history.push("/create");
                     }}
                 >
-                    Create PreGov Instance
+                    View PreGov Impact
                 </button>
                 <div>
                     <p>Event Link</p>
