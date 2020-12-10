@@ -41,6 +41,10 @@ const Embed = () => {
     const [priceNo, setPriceNo] = useState(0);
     const [url, setUrl] = useState('')
 
+    const getLogoUrl = (checksumAddress) => {
+      return `https://gnosis-safe-token-logos.s3.amazonaws.com/${checksumAddress}.png`;
+    }
+
     const predictPriceImpact = () => {
       // (predicted price of yes-predicted price of no)/predicted price of no
       if(!priceNo || !priceYes) return ''
@@ -50,63 +54,91 @@ const Embed = () => {
       return (result * 100).toFixed(2);
     }
 
-    const predictPrice = (outcomeIndex, baseOutcomeTokenMarginalPrices, quoteOutcomeTokenMarginalPrices) => {
+    const getTokenPrice = (outcomeIndex) => {
+      if ( baseTokenInfo.fixedProductMarketMakers !== null ) {
+        return (
+          quoteCurrencyTokenInfo.price *
+          (
+            parseFloat(
+              baseTokenInfo.fixedProductMarketMakers.outcomeTokenMarginalPrices[outcomeIndex]
+            ) /
+            parseFloat(
+              quoteCurrencyTokenInfo.fixedProductMarketMakers.outcomeTokenMarginalPrices[outcomeIndex]
+            )
+          )
+        );
+      }
+      return 0.0;
+    }
+
+    const predictPrice = (outcomeIndex) => {
       if(outcomeIndex === 0 && !!priceYes) {
         return priceYes.toFixed(2);
       }
-
       if(outcomeIndex === 1 && !!priceNo) {
         return priceNo.toFixed(2);
       }
 
-      const tokenPrice = (
-        quoteCurrencyTokenInfo.price *
-        (parseFloat(
-          baseOutcomeTokenMarginalPrices[outcomeIndex]
-        ) /
-          parseFloat(
-            quoteOutcomeTokenMarginalPrices[
-              outcomeIndex
-            ]
-          ))
-      );
-      if(outcomeIndex === 1) {
-        setPriceNo(tokenPrice);
-      } else {
+      const tokenPrice = getTokenPrice(outcomeIndex);
+      if (outcomeIndex === 0) {
         setPriceYes(tokenPrice);
+      } else {
+        setPriceNo(tokenPrice);
       }
-
       return tokenPrice.toFixed(2);
+    }
+
+    const setMarketMakers = (fixedProductMarketMakers) => {
+      if (fixedProductMarketMakers.length > 0) {
+        baseTokenInfo.fixedProductMarketMakers = fixedProductMarketMakers.find(
+          market => market.collateralToken === baseTokenInfo.address
+        );
+        quoteCurrencyTokenInfo.fixedProductMarketMakers = fixedProductMarketMakers.find(
+          market => market.collateralToken === quoteCurrencyTokenInfo.address
+        );
+      }
     }
 
     useEffect(() => {
         const fetchTokenInfo = async () => {
           if (baseTokenInfo === null) {
-            const prices = await getUniswapTokenPairs(quoteCurrencyToken, baseToken);
+            const tokenPairQuery = await getUniswapTokenPairs(quoteCurrencyToken, baseToken);
             const baseTokenContract = await getERC20Info(web3, baseToken);
-            const baseTokenInfo = { name: baseTokenContract.name, symbol: baseTokenContract.symbol };
+            const baseTokenInfo = {
+              address: baseToken.toLowerCase(),
+              checksumAddress: web3.utils.toChecksumAddress(baseToken),
+              name: baseTokenContract.name, 
+              symbol: baseTokenContract.symbol,
+              fixedProductMarketMakers: null
+            };
             const quoteCurrencyTokenContract = await getERC20Info(web3, quoteCurrencyToken);
-            const quoteCurrencyTokenInfo = { 
+            const quoteCurrencyTokenInfo = {
+              address: quoteCurrencyToken.toLowerCase(),
               name: quoteCurrencyTokenContract.name,
               symbol: quoteCurrencyTokenContract.symbol,
+              fixedProductMarketMakers: null,
               price: 0.0
             };
-            if (prices.data.pairsTokens0.length > 0 && prices.data.pairsTokens1.length > 0) {
-              quoteCurrencyTokenInfo.price = parseFloat(prices.data.pairsTokens0[0].token0Price) /
-                parseFloat(prices.data.pairsTokens1[0].token0Price);
+
+            if (tokenPairQuery.data.pairsTokens.length > 0) {
+              quoteCurrencyTokenInfo.price = tokenPairQuery.data.pairsTokens[0];
+            } else if (
+              tokenPairQuery.data.pairsTokens0.length > 0 &&
+              tokenPairQuery.data.pairsTokens1.length > 0
+            ) {
+              quoteCurrencyTokenInfo.price = 
+                parseFloat(tokenPairQuery.data.pairsTokens0[0].token0Price) /
+                parseFloat(tokenPairQuery.data.pairsTokens1[0].token0Price);
             }
             setBaseTokenInfo(baseTokenInfo);
             setQuoteCurrencyTokenInfo(quoteCurrencyTokenInfo);
             setLoading(false);
           }
         };
-
-        // console.log('question id', id, 'baseToken', baseToken, 'quoteCurrencyToken',quoteCurrencyToken);
-        if(baseToken && quoteCurrencyToken) {
+        if (baseToken && quoteCurrencyToken) {
           fetchTokenInfo();
         }
         const fullPath = window.location.search.substring(1);
-        // console.log(fullPath);
         const qArray = fullPath.split('=');
         if (qArray[0] === 'space') {
           setUrl(qArray[1])
@@ -125,32 +157,46 @@ const Embed = () => {
           }}
         >
           {({ data, error, loading }) => {
-            // console.log('data query omen', data, error, loading);
             return loading ? (
-              <p>Loading..</p>
+              <p>Loading...</p>
             ) : error ? (
               <Error error={error} />
             ) : (
               <>
+                { setMarketMakers(data.question.conditions[0].fixedProductMarketMakers) }
                 <h4 className="px-4 pt-3 border-bottom d-block bg-gray-dark rounded-top-0 rounded-md-top-2 width-full" style={{paddingBottom: '12px'}}>
-                  Predicted Impact
+                  Gnosis Impact
                 </h4>
                 <div className="p-4 width-full block-bg">
                   <div>
                     <div className="text-white mb-1">
                       <span className="mr-1">Predicted Price Impact:</span>
-                      <span className="float-right">{predictPriceImpact()}%</span>
+                      <span className="float-right">
+                        <img
+                          className="d-inline-block v-align-middle line-height-0 circle border"
+                          alt={baseTokenInfo.name}
+                          src={getLogoUrl(baseTokenInfo.checksumAddress)}
+                          width="22"
+                          height="22"
+                        />&nbsp;
+                        {predictPriceImpact()} %
+                      </span>
                     </div>
                   </div>
                   <div>
                     <div className="mb-1">
                       <b>{baseTokenInfo ? baseTokenInfo.name : ''} price if "Yes":</b>
                       <span className="float-right text-white">
-                        {predictPrice(
-                          0, 
-                          data.question.conditions[0].fixedProductMarketMakers[0].outcomeTokenMarginalPrices,
-                          data.question.conditions[0].fixedProductMarketMakers[1].outcomeTokenMarginalPrices
-                        )} {quoteCurrencyTokenInfo.symbol}
+                        1&nbsp;
+                        {
+                          baseTokenInfo.symbol
+                        } =&nbsp;
+                        {
+                          predictPrice(0)
+                        }&nbsp;
+                        {
+                          quoteCurrencyTokenInfo.symbol
+                        }
                       </span>
                     </div>
                   </div>
@@ -158,11 +204,16 @@ const Embed = () => {
                     <div className="mb-1">
                       <b>{baseTokenInfo ? baseTokenInfo.name : ''} price if "No":</b>
                       <span className="float-right text-white">
-                        {predictPrice(
-                          1,
-                          data.question.conditions[0].fixedProductMarketMakers[0].outcomeTokenMarginalPrices,
-                          data.question.conditions[0].fixedProductMarketMakers[1].outcomeTokenMarginalPrices
-                        )} {quoteCurrencyTokenInfo.symbol}
+                        1&nbsp;
+                        {
+                          baseTokenInfo.symbol
+                        } =&nbsp;
+                        {
+                          predictPrice(1)
+                        }&nbsp;
+                        {
+                          quoteCurrencyTokenInfo.symbol
+                        }
                       </span>
                     </div>
                   </div>
@@ -170,7 +221,7 @@ const Embed = () => {
                     <div className="mb-1">
                       <b>{baseTokenInfo ? baseTokenInfo.name : ''} Market</b>
                       <span className="float-right text-white">
-                        <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[0].id}`}>
+                        <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${baseTokenInfo.fixedProductMarketMakers.id}`}>
                           <i className='fas fa-external-link-alt'></i>
                         </a>
                       </span>
@@ -178,7 +229,7 @@ const Embed = () => {
                     <div className="mb-1">
                       <b>{baseTokenInfo ? quoteCurrencyTokenInfo.name : ''} Market</b>
                       <span className="float-right text-white">
-                        <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${data.question.conditions[0].fixedProductMarketMakers[1].id}`}>
+                        <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${quoteCurrencyTokenInfo.fixedProductMarketMakers.id}`}>
                           <i className='fas fa-external-link-alt'></i>
                         </a>
                       </span>
@@ -190,7 +241,7 @@ const Embed = () => {
         </Query>
       </div>
     ) : (
-      <p>Loading..</p>
+      <p>Loading...</p>
     );
 };
 
