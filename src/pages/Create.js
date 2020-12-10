@@ -5,7 +5,7 @@ import "../styles/css/pages.css";
 const Create = () => {
     return (
         <>
-            <h2>PreGov</h2>
+            <h2>Gnosis Impact</h2>
             <p id='title-helper'>
                 Know the impact of your governance decisions before you make
                 them
@@ -23,7 +23,7 @@ const Create = () => {
                     <label>URL to governance event</label>
                     <input type='text' id='governance-event' />
                 </div>
-                <button>Create</button>
+                <button>View</button>
             </div>
         </>
     );

@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import dotenv from 'dotenv-flow';
 
 import Home from "./pages/Home";
 import Create from "./pages/Create";
@@ -7,6 +8,8 @@ import Details from "./pages/Details";
 import Embed from "./pages/Embed";
 
 import "./App.css";
+
+dotenv.config();
 
 function App() {
     return (
@@ -22,7 +25,7 @@ function App() {
                     <Route path='/create/:id' exact>
                         <Details />
                     </Route>
-                    <Route path='/embed/:id/:token1/:token2' exact>
+                    <Route path='/embed/:id/:baseToken/:quoteCurrencyToken' exact>
                         <Embed />
                     </Route>
                 </Switch>
