@@ -33,9 +33,9 @@ const OMEN_SUBGRAPH_QUERY = gql`
 }`
 
 const Embed = () => {
-    const { id, baseToken, quoteCurrencyToken } = useParams();
+    const { id, baseToken, quoteToken } = useParams();
     const [baseTokenInfo, setBaseTokenInfo] = useState(null);
-    const [quoteCurrencyTokenInfo, setQuoteCurrencyTokenInfo] = useState(null);
+    const [quoteTokenInfo, setQuoteTokenInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [priceYes, setPriceYes] = useState(0);
     const [priceNo, setPriceNo] = useState(0);
@@ -57,13 +57,13 @@ const Embed = () => {
     const getTokenPrice = (outcomeIndex) => {
       if ( baseTokenInfo.fixedProductMarketMakers !== null ) {
         return (
-          quoteCurrencyTokenInfo.price *
+          quoteTokenInfo.price *
           (
             parseFloat(
               baseTokenInfo.fixedProductMarketMakers.outcomeTokenMarginalPrices[outcomeIndex]
             ) /
             parseFloat(
-              quoteCurrencyTokenInfo.fixedProductMarketMakers.outcomeTokenMarginalPrices[outcomeIndex]
+              quoteTokenInfo.fixedProductMarketMakers.outcomeTokenMarginalPrices[outcomeIndex]
             )
           )
         );
@@ -93,8 +93,8 @@ const Embed = () => {
         baseTokenInfo.fixedProductMarketMakers = fixedProductMarketMakers.find(
           market => market.collateralToken === baseTokenInfo.address
         );
-        quoteCurrencyTokenInfo.fixedProductMarketMakers = fixedProductMarketMakers.find(
-          market => market.collateralToken === quoteCurrencyTokenInfo.address
+        quoteTokenInfo.fixedProductMarketMakers = fixedProductMarketMakers.find(
+          market => market.collateralToken === quoteTokenInfo.address
         );
       }
     }
@@ -102,7 +102,7 @@ const Embed = () => {
     useEffect(() => {
         const fetchTokenInfo = async () => {
           if (baseTokenInfo === null) {
-            const tokenPairQuery = await getUniswapTokenPairs(quoteCurrencyToken, baseToken);
+            const tokenPairQuery = await getUniswapTokenPairs(quoteToken.toLowerCase(), baseToken.toLowerCase());
             const baseTokenContract = await getERC20Info(web3, baseToken);
             const baseTokenInfo = {
               address: baseToken.toLowerCase(),
@@ -111,31 +111,31 @@ const Embed = () => {
               symbol: baseTokenContract.symbol,
               fixedProductMarketMakers: null
             };
-            const quoteCurrencyTokenContract = await getERC20Info(web3, quoteCurrencyToken);
-            const quoteCurrencyTokenInfo = {
-              address: quoteCurrencyToken.toLowerCase(),
-              name: quoteCurrencyTokenContract.name,
-              symbol: quoteCurrencyTokenContract.symbol,
+            const quoteTokenContract = await getERC20Info(web3, quoteToken);
+            const quoteTokenInfo = {
+              address: quoteToken.toLowerCase(),
+              name: quoteTokenContract.name,
+              symbol: quoteTokenContract.symbol,
               fixedProductMarketMakers: null,
               price: 0.0
             };
 
             if (tokenPairQuery.data.pairsTokens.length > 0) {
-              quoteCurrencyTokenInfo.price = tokenPairQuery.data.pairsTokens[0];
+              quoteTokenInfo.price = tokenPairQuery.data.pairsTokens[0];
             } else if (
               tokenPairQuery.data.pairsTokens0.length > 0 &&
               tokenPairQuery.data.pairsTokens1.length > 0
             ) {
-              quoteCurrencyTokenInfo.price = 
+              quoteTokenInfo.price = 
                 parseFloat(tokenPairQuery.data.pairsTokens0[0].token0Price) /
                 parseFloat(tokenPairQuery.data.pairsTokens1[0].token0Price);
             }
             setBaseTokenInfo(baseTokenInfo);
-            setQuoteCurrencyTokenInfo(quoteCurrencyTokenInfo);
+            setQuoteTokenInfo(quoteTokenInfo);
             setLoading(false);
           }
         };
-        if (baseToken && quoteCurrencyToken) {
+        if (baseToken && quoteToken) {
           fetchTokenInfo();
         }
         const fullPath = window.location.search.substring(1);
@@ -143,7 +143,7 @@ const Embed = () => {
         if (qArray[0] === 'space') {
           setUrl(qArray[1])
         }
-    }, [id, baseToken, quoteCurrencyToken, baseTokenInfo, quoteCurrencyTokenInfo]);
+    }, [id, baseToken, quoteToken, baseTokenInfo, quoteTokenInfo]);
 
     return !loading ? (
       <div id="app" className={`details ${url} width-full height-full`}>
@@ -195,7 +195,7 @@ const Embed = () => {
                           predictPrice(0)
                         }&nbsp;
                         {
-                          quoteCurrencyTokenInfo.symbol
+                          quoteTokenInfo.symbol
                         }
                       </span>
                     </div>
@@ -212,7 +212,7 @@ const Embed = () => {
                           predictPrice(1)
                         }&nbsp;
                         {
-                          quoteCurrencyTokenInfo.symbol
+                          quoteTokenInfo.symbol
                         }
                       </span>
                     </div>
@@ -227,9 +227,9 @@ const Embed = () => {
                       </span>
                     </div>
                     <div className="mb-1">
-                      <b>{baseTokenInfo ? quoteCurrencyTokenInfo.name : ''} Market</b>
+                      <b>{baseTokenInfo ? quoteTokenInfo.name : ''} Market</b>
                       <span className="float-right text-white">
-                        <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${quoteCurrencyTokenInfo.fixedProductMarketMakers.id}`}>
+                        <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${quoteTokenInfo.fixedProductMarketMakers.id}`}>
                           <i className='fas fa-external-link-alt'></i>
                         </a>
                       </span>
