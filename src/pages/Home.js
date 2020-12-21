@@ -1,57 +1,41 @@
-import React, { useState, useEffect } from "react";
-import { withRouter } from "react-router-dom";
-
-import Instance from "../components/Instance";
+import React, { useState } from 'react';
 
 import "../styles/css/pages.css";
 
-const Home = (props) => {
-    const [instances, setInstances] = useState([]);
+const Home = () => {
 
-    const fetchInstances = async () => {
-        let results = await fetch("http://localhost:8000/instances");
-        results = await results.json();
-        setInstances(results);
-    };
+    const [submitting, setSubmitting] = useState(false);
 
-    useEffect(() => {
-        fetchInstances();
-    }, []);
-
+    const handleSubmit = event => {
+        event.preventDefault();
+       setSubmitting(true);
+    
+       setTimeout(() => {
+         setSubmitting(false);
+       }, 3000)
+     }
+    
     return (
         <>
             <h2>Gnosis Impact</h2>
-                <p id='title-helper'>
-                    Know the impact of your governance decisions before you make
-                    them
-                </p>
-            <div className='home'>
-                <button
-                    id='create-instance'
-                    onClick={() => {
-                        props.history.push("/create");
-                    }}
-                >
-                    View PreGov Impact
-                </button>
+            <p id='title-helper'>
+                Know the impact of your governance decisions before you make them
+            </p>
+            <form id="main-home" action='/embed' method='GET'>
+            <div className='create'>
                 <div>
-                    <p>Event Link</p>
-                    <p>Predicted Price Impact</p>
-                    <p>More Info</p>
+                    <label>Omen Market URL with base token</label>
+                    <input type='text' id='omen-market-base-token' name='quote-token-market' />
                 </div>
-                {instances.map((instance, index) => {
-                    return (
-                        <Instance
-                            key={index}
-                            instance_id={instance.id}
-                            event_link={instance.event_link}
-                            price_impact={instance.predicted_price_impact_percent}
-                        />
-                    );
-                })}
+                <div>
+                    <label>Omen Market URL with quote token</label>
+                    <input type='text' id='omne-market-quote-token' name='quote-token-market' />
+                </div>
+                <button>View</button>
             </div>
+            </form>
         </>
     );
 };
 
-export default withRouter(Home);
+export default Home;
