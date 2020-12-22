@@ -3,8 +3,6 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import dotenv from 'dotenv-flow';
 
 import Home from "./pages/Home";
-import Create from "./pages/Create";
-import Details from "./pages/Details";
 import Embed from "./pages/Embed";
 
 import "./App.css";
@@ -19,13 +17,7 @@ function App() {
                     <Route path='/' exact>
                         <Home />
                     </Route>
-                    <Route path='/create' exact>
-                        <Create />
-                    </Route>
-                    <Route path='/create/:id' exact>
-                        <Details />
-                    </Route>
-                    <Route path='/embed/:id/:baseToken/:quoteToken' exact>
+                    <Route path='/embed/:baseTokenMarket/:quoteTokenMarket' exact>
                         <Embed />
                     </Route>
                 </Switch>

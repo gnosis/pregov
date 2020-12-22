@@ -1,57 +1,32 @@
-import React, { useState, useEffect } from "react";
-import { withRouter } from "react-router-dom";
-
-import Instance from "../components/Instance";
+import React from 'react';
 
 import "../styles/css/pages.css";
 
-const Home = (props) => {
-    const [instances, setInstances] = useState([]);
-
-    const fetchInstances = async () => {
-        let results = await fetch("http://localhost:8000/instances");
-        results = await results.json();
-        setInstances(results);
-    };
-
-    useEffect(() => {
-        fetchInstances();
-    }, []);
+const Home = () => {
 
     return (
         <>
             <h2>Gnosis Impact</h2>
-                <p id='title-helper'>
-                    Know the impact of your governance decisions before you make
-                    them
-                </p>
-            <div className='home'>
-                <button
-                    id='create-instance'
-                    onClick={() => {
-                        props.history.push("/create");
-                    }}
-                >
-                    View PreGov Impact
-                </button>
-                <div>
-                    <p>Event Link</p>
-                    <p>Predicted Price Impact</p>
-                    <p>More Info</p>
-                </div>
-                {instances.map((instance, index) => {
-                    return (
-                        <Instance
-                            key={index}
-                            instance_id={instance.id}
-                            event_link={instance.event_link}
-                            price_impact={instance.predicted_price_impact_percent}
-                        />
-                    );
-                })}
-            </div>
+            <p id='title-helper'>
+                Know the impact of your governance decisions before you make them
+            </p>
+            <div className='create'>
+            <form id="main-home" action='/embed' method='GET'>
+                <fieldset>
+                    <legend>Omen Market URL with base token</legend>
+                    <input type='text' id='omen-market-base-token' name='quote-token-market' autoFocus='true' />
+                </fieldset>
+                <fieldset>
+                    <legend>Omen Market URL with quote token</legend>
+                    <input type='text' id='omne-market-quote-token' name='quote-token-market' />
+                </fieldset>
+                <fieldset>
+                    <button>View</button>
+                </fieldset>
+            </form>
+            </div>   
         </>
     );
 };
 
-export default withRouter(Home);
+export default Home;

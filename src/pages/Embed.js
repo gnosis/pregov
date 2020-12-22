@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Query } from 'react-apollo'
+import { useQuery } from 'react-apollo'
 import { gql } from 'apollo-boost'
 import { withRouter } from 'react-router-dom';
 
@@ -13,30 +13,24 @@ import Web3 from 'web3';
 const web3Endpoint = process.env.REACT_APP_DEFAULT_NODE_ETH;
 const web3 = new Web3(new Web3.providers.HttpProvider(web3Endpoint));
 
-const MAX_QUERY_AMOUNT = 20;
-
 const OMEN_SUBGRAPH_QUERY = gql`
-  query question($id: String!) {
-      question(id: $id) {
-    id
-    title
-    conditions {
-      id
-      fixedProductMarketMakers {
-        id
-        collateralToken
-        outcomeTokenAmounts
-        outcomeTokenMarginalPrices
-      }
+  query fixedProductMarketMaker($baseTokenMarket: String!, $quoteTokenMarket: String!) {
+    baseTokenMarket: fixedProductMarketMaker(id: $baseTokenMarket) {
+      collateralToken
+      outcomeTokenMarginalPrices
     }
-  }
-}`
+    quoteTokenMarket: fixedProductMarketMaker(id: $quoteTokenMarket) {
+      collateralToken
+      outcomeTokenMarginalPrices
+    }
+  }`;
 
 const Embed = () => {
-    const { id, baseToken, quoteToken } = useParams();
+    const { baseTokenMarket, quoteTokenMarket } = useParams();
+    const [loading, setLoading] = useState(true);
+    const [fixedProductMarketMakers, setFixedProductMarketMakers] = useState(null);
     const [baseTokenInfo, setBaseTokenInfo] = useState(null);
     const [quoteTokenInfo, setQuoteTokenInfo] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [priceYes, setPriceYes] = useState(0);
     const [priceNo, setPriceNo] = useState(0);
     const [url, setUrl] = useState('')
@@ -55,15 +49,15 @@ const Embed = () => {
     }
 
     const getTokenPrice = (outcomeIndex) => {
-      if ( baseTokenInfo.fixedProductMarketMakers !== null ) {
+      if ( baseTokenInfo && baseTokenInfo.fixedProductMarketMakers !== null ) {
         return (
           quoteTokenInfo.price *
           (
             parseFloat(
-              baseTokenInfo.fixedProductMarketMakers.outcomeTokenMarginalPrices[outcomeIndex]
+              baseTokenInfo.outcomeTokenMarginalPrices[outcomeIndex]
             ) /
             parseFloat(
-              quoteTokenInfo.fixedProductMarketMakers.outcomeTokenMarginalPrices[outcomeIndex]
+              quoteTokenInfo.outcomeTokenMarginalPrices[outcomeIndex]
             )
           )
         );
@@ -88,161 +82,151 @@ const Embed = () => {
       return tokenPrice.toFixed(2);
     }
 
-    const setMarketMakers = (fixedProductMarketMakers) => {
-      if (fixedProductMarketMakers.length > 0) {
-        baseTokenInfo.fixedProductMarketMakers = fixedProductMarketMakers.find(
-          market => market.collateralToken === baseTokenInfo.address
-        );
-        quoteTokenInfo.fixedProductMarketMakers = fixedProductMarketMakers.find(
-          market => market.collateralToken === quoteTokenInfo.address
-        );
+    const getTokenPairPrice = async (quoteTokenAddress, baseTokenAddress) => {
+      let result = 0.0;
+      const tokenPairQuery = await getUniswapTokenPairs(quoteTokenAddress, baseTokenAddress);
+      if (tokenPairQuery.data.pairsTokens.length > 0) {
+        result = tokenPairQuery.data.pairsTokens[0];
+      } else if (
+        tokenPairQuery.data.pairsTokens0.length > 0 &&
+        tokenPairQuery.data.pairsTokens1.length > 0
+      ) {
+        result =
+          parseFloat(tokenPairQuery.data.pairsTokens0[0].token0Price) /
+          parseFloat(tokenPairQuery.data.pairsTokens1[0].token0Price);
       }
+      
+      return result;
     }
 
     useEffect(() => {
-        const fetchTokenInfo = async () => {
-          if (baseTokenInfo === null) {
-            const tokenPairQuery = await getUniswapTokenPairs(quoteToken.toLowerCase(), baseToken.toLowerCase());
-            const baseTokenContract = await getERC20Info(web3, baseToken);
-            const baseTokenInfo = {
-              address: baseToken.toLowerCase(),
-              checksumAddress: web3.utils.toChecksumAddress(baseToken),
-              name: baseTokenContract.name, 
-              symbol: baseTokenContract.symbol,
-              fixedProductMarketMakers: null
-            };
-            const quoteTokenContract = await getERC20Info(web3, quoteToken);
+      const fetchTokenInfo = async () => {
+        if (fixedProductMarketMakers.baseTokenMarket) {
+          const baseTokenAddress = fixedProductMarketMakers.baseTokenMarket.collateralToken.toLowerCase();
+          const baseTokenContract = await getERC20Info(web3, baseTokenAddress);
+          const baseTokenInfo = {
+            address: baseTokenAddress,
+            checksumAddress: web3.utils.toChecksumAddress(baseTokenAddress),
+            name: baseTokenContract.name, 
+            symbol: baseTokenContract.symbol,
+            fixedProductMarketMakers: baseTokenMarket,
+            outcomeTokenMarginalPrices: fixedProductMarketMakers.baseTokenMarket.outcomeTokenMarginalPrices
+          };
+          setBaseTokenInfo(baseTokenInfo);
+  
+          if (fixedProductMarketMakers.quoteTokenMarket) {
+            const quoteTokenAddress = fixedProductMarketMakers.quoteTokenMarket.collateralToken.toLowerCase();
+            const quoteTokenContract = await getERC20Info(web3, quoteTokenAddress);
             const quoteTokenInfo = {
-              address: quoteToken.toLowerCase(),
-              name: quoteTokenContract.name,
+              address: quoteTokenAddress,
+              checksumAddress: web3.utils.toChecksumAddress(quoteTokenAddress),
+              name: quoteTokenContract.name, 
               symbol: quoteTokenContract.symbol,
-              fixedProductMarketMakers: null,
-              price: 0.0
-            };
-
-            if (tokenPairQuery.data.pairsTokens.length > 0) {
-              quoteTokenInfo.price = tokenPairQuery.data.pairsTokens[0];
-            } else if (
-              tokenPairQuery.data.pairsTokens0.length > 0 &&
-              tokenPairQuery.data.pairsTokens1.length > 0
-            ) {
-              quoteTokenInfo.price = 
-                parseFloat(tokenPairQuery.data.pairsTokens0[0].token0Price) /
-                parseFloat(tokenPairQuery.data.pairsTokens1[0].token0Price);
-            }
-            setBaseTokenInfo(baseTokenInfo);
+              fixedProductMarketMakers: quoteTokenMarket,
+              outcomeTokenMarginalPrices: fixedProductMarketMakers.quoteTokenMarket.outcomeTokenMarginalPrices,
+              price: await getTokenPairPrice(quoteTokenAddress, baseTokenAddress),
+            }; 
             setQuoteTokenInfo(quoteTokenInfo);
-            setLoading(false);
           }
-        };
-        if (baseToken && quoteToken) {
-          fetchTokenInfo();
         }
-        const fullPath = window.location.search.substring(1);
-        const qArray = fullPath.split('=');
-        if (qArray[0] === 'space') {
-          setUrl(qArray[1])
-        }
-    }, [id, baseToken, quoteToken, baseTokenInfo, quoteTokenInfo]);
+        setLoading(false);
+      }
+      if (fixedProductMarketMakers) {
+        fetchTokenInfo();
+      }
+      const fullPath = window.location.search.substring(1);
+      const qArray = fullPath.split('=');
+      if (qArray[0] === 'space') {
+        setUrl(qArray[1])
+      }  
+    }, [fixedProductMarketMakers, baseTokenInfo, quoteTokenInfo]);
 
-    return !loading ? (
+    const { loadingQuery, error, data } = useQuery(OMEN_SUBGRAPH_QUERY, {
+      variables: {
+        baseTokenMarket,
+        quoteTokenMarket
+    }});
+
+    if (loadingQuery) return 'Loading...';
+    if (error) return <Error error={error} />;
+    setFixedProductMarketMakers(data);
+
+    return !loading && (
       <div id="app" className={`details ${url} width-full height-full`}>
-        <Query
-          query={OMEN_SUBGRAPH_QUERY}
-          variables={{
-            id,
-            where: {},
-            orderBy: 'timeCreated',
-            first: MAX_QUERY_AMOUNT,
-          }}
-        >
-          {({ data, error, loading }) => {
-            return loading ? (
-              <p>Loading...</p>
-            ) : error ? (
-              <Error error={error} />
-            ) : (
-              <>
-                { setMarketMakers(data.question.conditions[0].fixedProductMarketMakers) }
-                <h4 className="px-4 pt-3 border-bottom d-block bg-gray-dark rounded-top-0 rounded-md-top-2 width-full" style={{paddingBottom: '12px'}}>
-                  Gnosis Impact
-                </h4>
-                <div className="p-4 width-full block-bg">
-                  <div>
-                    <div className="text-white mb-1">
-                      <span className="mr-1">Predicted Price Impact:</span>
-                      <span className="float-right">
-                        <img
-                          className="d-inline-block v-align-middle line-height-0 circle border"
-                          alt={baseTokenInfo.name}
-                          src={getLogoUrl(baseTokenInfo.checksumAddress)}
-                          width="22"
-                          height="22"
-                        />&nbsp;
-                        {predictPriceImpact()} %
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-1">
-                      <b>{baseTokenInfo ? baseTokenInfo.name : ''} price if "Yes":</b>
-                      <span className="float-right text-white">
-                        1&nbsp;
-                        {
-                          baseTokenInfo.symbol
-                        } =&nbsp;
-                        {
-                          predictPrice(0)
-                        }&nbsp;
-                        {
-                          quoteTokenInfo.symbol
-                        }
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-1">
-                      <b>{baseTokenInfo ? baseTokenInfo.name : ''} price if "No":</b>
-                      <span className="float-right text-white">
-                        1&nbsp;
-                        {
-                          baseTokenInfo.symbol
-                        } =&nbsp;
-                        {
-                          predictPrice(1)
-                        }&nbsp;
-                        {
-                          quoteTokenInfo.symbol
-                        }
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-1">
-                      <b>{baseTokenInfo ? baseTokenInfo.name : ''} Market</b>
-                      <span className="float-right text-white">
-                        <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${baseTokenInfo.fixedProductMarketMakers.id}`}>
-                          <i className='fas fa-external-link-alt'></i>
-                        </a>
-                      </span>
-                    </div>
-                    <div className="mb-1">
-                      <b>{baseTokenInfo ? quoteTokenInfo.name : ''} Market</b>
-                      <span className="float-right text-white">
-                        <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${quoteTokenInfo.fixedProductMarketMakers.id}`}>
-                          <i className='fas fa-external-link-alt'></i>
-                        </a>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}}
-        </Query>
+        <h4 className="px-4 pt-3 border-bottom d-block bg-gray-dark rounded-top-0 rounded-md-top-2 width-full" style={{paddingBottom: '12px'}}>
+          Gnosis Impact
+        </h4>
+        <div className="p-4 width-full block-bg">
+          <div>
+            <div className="text-white mb-1">
+              <span className="mr-1">Predicted Price Impact:</span>
+              <span className="float-right">
+                <img
+                  className="d-inline-block v-align-middle line-height-0 circle border"
+                  alt={baseTokenInfo ? baseTokenInfo.name : ''}
+                  src={getLogoUrl(baseTokenInfo ? baseTokenInfo.checksumAddress : '')}
+                  width="22"
+                  height="22"
+                />&nbsp;
+                {predictPriceImpact()} %
+              </span>
+            </div>
+          </div>
+          <div>
+            <div className="mb-1">
+              <b>{baseTokenInfo ? baseTokenInfo.name : ''} price if "Yes":</b>
+              <span className="float-right text-white">
+                1&nbsp;
+                {
+                  baseTokenInfo ? baseTokenInfo.symbol : ''
+                } =&nbsp;
+                {
+                  predictPrice(0)
+                }&nbsp;
+                {
+                  quoteTokenInfo ? quoteTokenInfo.symbol : ''
+                }
+              </span>
+            </div>
+          </div>
+          <div>
+            <div className="mb-1">
+              <b>{baseTokenInfo ? baseTokenInfo.name : ''} price if "No":</b>
+              <span className="float-right text-white">
+                1&nbsp;
+                {
+                  baseTokenInfo ? baseTokenInfo.symbol : ''
+                } =&nbsp;
+                {
+                  predictPrice(1)
+                }&nbsp;
+                {
+                  quoteTokenInfo ? quoteTokenInfo.symbol : ''
+                }
+              </span>
+            </div>
+          </div>
+          <div>
+            <div className="mb-1">
+              <b>{baseTokenInfo ? baseTokenInfo.name : ''} Market</b>
+              <span className="float-right text-white">
+                <a target="_blank" rel="noopener noreferrer" href={baseTokenInfo ? `https://omen.eth.link/#/${baseTokenInfo.fixedProductMarketMakers.id}` : ''}>
+                  <i className='fas fa-external-link-alt'></i>
+                </a>
+              </span>
+            </div>
+            <div className="mb-1">
+              <b>{baseTokenInfo ? quoteTokenInfo.name : ''} Market</b>
+              <span className="float-right text-white">
+                <a target="_blank" rel="noopener noreferrer" href={quoteTokenInfo ? `https://omen.eth.link/#/${quoteTokenInfo.fixedProductMarketMakers.id}` : ''}>
+                  <i className='fas fa-external-link-alt'></i>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-    ) : (
-      <p>Loading...</p>
     );
-};
+}
 
 export default withRouter(Embed);

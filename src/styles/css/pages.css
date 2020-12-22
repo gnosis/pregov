@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Questrial&display=swap");
 .home,
+form .create,
 .create {
   height: 100%;
   width: 100%;
@@ -53,7 +54,8 @@
   margin-bottom: 0.5rem;
 }
 
-.create div {
+.create div,
+form .create div {
   width: 50%;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -65,16 +67,19 @@
   margin-bottom: 1rem;
 }
 
+form .create div label,
 .create div label {
   margin-bottom: 0.5rem;
 }
 
+form .create div input,
 .create div input {
   height: 30px;
   font-family: "Questrial", sans-serif;
   color: var(--text-color)
 }
 
+form .create button,
 .create button {
   width: 200px;
   background: none;
@@ -88,6 +93,7 @@
   color: var(--text-color)
 }
 
+form .create button:hover,
 .create button:hover {
   cursor: pointer;
 }
