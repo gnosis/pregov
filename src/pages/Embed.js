@@ -27,6 +27,7 @@ const OMEN_SUBGRAPH_QUERY = gql`
 
 const Embed = () => {
     const { baseTokenMarket, quoteTokenMarket } = useParams();
+    const [loading, setLoading] = useState(true);
     const [baseTokenInfo, setBaseTokenInfo] = useState(null);
     const [quoteTokenInfo, setQuoteTokenInfo] = useState(null);
     const [priceYes, setPriceYes] = useState(0);
@@ -47,15 +48,15 @@ const Embed = () => {
     }
 
     const getTokenPrice = (outcomeIndex) => {
-      if ( baseTokenInfo.fixedProductMarketMakers !== null ) {
+      if ( baseTokenInfo && baseTokenInfo.fixedProductMarketMakers !== null ) {
         return (
           quoteTokenInfo.price *
           (
             parseFloat(
-              baseTokenInfo.fixedProductMarketMakers.outcomeTokenMarginalPrices[outcomeIndex]
+              baseTokenInfo.outcomeTokenMarginalPrices[outcomeIndex]
             ) /
             parseFloat(
-              quoteTokenInfo.fixedProductMarketMakers.outcomeTokenMarginalPrices[outcomeIndex]
+              quoteTokenInfo.outcomeTokenMarginalPrices[outcomeIndex]
             )
           )
         );
@@ -97,9 +98,11 @@ const Embed = () => {
       return result;
     }
 
-    const setMarketMakers = async (fixedProductMarketMakers) => {
-      if (fixedProductMarketMakers.baseTokenMarket.length > 0) {
-        const baseTokenAddress = fixedProductMarketMakers.baseTokenMarket[0].collateralToken.toLowerCase();
+    const fetchTokenInfo = async (fixedProductMarketMakers) => {
+      console.log(fixedProductMarketMakers);
+
+      if (fixedProductMarketMakers.baseTokenMarket) {
+        const baseTokenAddress = fixedProductMarketMakers.baseTokenMarket.collateralToken.toLowerCase();
         const baseTokenContract = await getERC20Info(web3, baseTokenAddress);
         const baseTokenInfo = {
           address: baseTokenAddress,
@@ -109,9 +112,10 @@ const Embed = () => {
           fixedProductMarketMakers: baseTokenMarket,
           outcomeTokenMarginalPrices: fixedProductMarketMakers.baseTokenMarket.outcomeTokenMarginalPrices
         };
+        setBaseTokenInfo(baseTokenInfo);
 
-        if (baseTokenAddress && fixedProductMarketMakers.quoteTokenMarket.length > 0) {
-          const quoteTokenAddress = fixedProductMarketMakers.quoteTokenMarket[0].collateralToken.toLowerCase();
+        if (fixedProductMarketMakers.quoteTokenMarket) {
+          const quoteTokenAddress = fixedProductMarketMakers.quoteTokenMarket.collateralToken.toLowerCase();
           const quoteTokenContract = await getERC20Info(web3, quoteTokenAddress);
           const quoteTokenInfo = {
             address: quoteTokenAddress,
@@ -121,13 +125,11 @@ const Embed = () => {
             fixedProductMarketMakers: quoteTokenMarket,
             outcomeTokenMarginalPrices: fixedProductMarketMakers.quoteTokenMarket.outcomeTokenMarginalPrices,
             price: await getTokenPairPrice(quoteTokenAddress, baseTokenAddress),
-          };
-
-          setBaseTokenInfo(baseTokenInfo);
+          }; 
           setQuoteTokenInfo(quoteTokenInfo);
         }
       }
-    }
+    }    
 
     useEffect(() => {
       const fullPath = window.location.search.substring(1);
@@ -137,18 +139,20 @@ const Embed = () => {
       }  
     }, []);
 
-    const { loading, error, data } = useQuery(OMEN_SUBGRAPH_QUERY, {
+    const { loadingQuery, error, data } = useQuery(OMEN_SUBGRAPH_QUERY, {
       variables: {
         baseTokenMarket,
         quoteTokenMarket
     }});
-        
-    if (data) console.log(data);
-    if (loading) return 'Loading...';
-    if (error) return <Error error={error} />;
-    setMarketMakers(data);
 
-    return (
+    if (loadingQuery) return 'Loading...';
+    if (error) return <Error error={error} />;
+    if (!baseTokenInfo) {
+      fetchTokenInfo(data);
+      setLoading(false);
+    }
+
+    return !loading && (
       <div id="app" className={`details ${url} width-full height-full`}>
         <h4 className="px-4 pt-3 border-bottom d-block bg-gray-dark rounded-top-0 rounded-md-top-2 width-full" style={{paddingBottom: '12px'}}>
           Gnosis Impact
@@ -160,8 +164,8 @@ const Embed = () => {
               <span className="float-right">
                 <img
                   className="d-inline-block v-align-middle line-height-0 circle border"
-                  alt={baseTokenInfo.name}
-                  src={getLogoUrl(baseTokenInfo.checksumAddress)}
+                  alt={baseTokenInfo ? baseTokenInfo.name : ''}
+                  src={getLogoUrl(baseTokenInfo ? baseTokenInfo.checksumAddress : '')}
                   width="22"
                   height="22"
                 />&nbsp;
@@ -175,13 +179,13 @@ const Embed = () => {
               <span className="float-right text-white">
                 1&nbsp;
                 {
-                  baseTokenInfo.symbol
+                  baseTokenInfo ? baseTokenInfo.symbol : ''
                 } =&nbsp;
                 {
                   predictPrice(0)
                 }&nbsp;
                 {
-                  quoteTokenInfo.symbol
+                  quoteTokenInfo ? quoteTokenInfo.symbol : ''
                 }
               </span>
             </div>
@@ -192,13 +196,13 @@ const Embed = () => {
               <span className="float-right text-white">
                 1&nbsp;
                 {
-                  baseTokenInfo.symbol
+                  baseTokenInfo ? baseTokenInfo.symbol : ''
                 } =&nbsp;
                 {
                   predictPrice(1)
                 }&nbsp;
                 {
-                  quoteTokenInfo.symbol
+                  quoteTokenInfo ? quoteTokenInfo.symbol : ''
                 }
               </span>
             </div>
@@ -207,7 +211,7 @@ const Embed = () => {
             <div className="mb-1">
               <b>{baseTokenInfo ? baseTokenInfo.name : ''} Market</b>
               <span className="float-right text-white">
-                <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${baseTokenInfo.fixedProductMarketMakers.id}`}>
+                <a target="_blank" rel="noopener noreferrer" href={baseTokenInfo ? `https://omen.eth.link/#/${baseTokenInfo.fixedProductMarketMakers.id}` : ''}>
                   <i className='fas fa-external-link-alt'></i>
                 </a>
               </span>
@@ -215,7 +219,7 @@ const Embed = () => {
             <div className="mb-1">
               <b>{baseTokenInfo ? quoteTokenInfo.name : ''} Market</b>
               <span className="float-right text-white">
-                <a target="_blank" rel="noopener noreferrer" href={`https://omen.eth.link/#/${quoteTokenInfo.fixedProductMarketMakers.id}`}>
+                <a target="_blank" rel="noopener noreferrer" href={quoteTokenInfo ? `https://omen.eth.link/#/${quoteTokenInfo.fixedProductMarketMakers.id}` : ''}>
                   <i className='fas fa-external-link-alt'></i>
                 </a>
               </span>
