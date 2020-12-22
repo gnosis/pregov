@@ -28,6 +28,7 @@ const OMEN_SUBGRAPH_QUERY = gql`
 const Embed = () => {
     const { baseTokenMarket, quoteTokenMarket } = useParams();
     const [loading, setLoading] = useState(true);
+    const [fixedProductMarketMakers, setFixedProductMarketMakers] = useState(null);
     const [baseTokenInfo, setBaseTokenInfo] = useState(null);
     const [quoteTokenInfo, setQuoteTokenInfo] = useState(null);
     const [priceYes, setPriceYes] = useState(0);
@@ -98,46 +99,47 @@ const Embed = () => {
       return result;
     }
 
-    const fetchTokenInfo = async (fixedProductMarketMakers) => {
-      console.log(fixedProductMarketMakers);
-
-      if (fixedProductMarketMakers.baseTokenMarket) {
-        const baseTokenAddress = fixedProductMarketMakers.baseTokenMarket.collateralToken.toLowerCase();
-        const baseTokenContract = await getERC20Info(web3, baseTokenAddress);
-        const baseTokenInfo = {
-          address: baseTokenAddress,
-          checksumAddress: web3.utils.toChecksumAddress(baseTokenAddress),
-          name: baseTokenContract.name, 
-          symbol: baseTokenContract.symbol,
-          fixedProductMarketMakers: baseTokenMarket,
-          outcomeTokenMarginalPrices: fixedProductMarketMakers.baseTokenMarket.outcomeTokenMarginalPrices
-        };
-        setBaseTokenInfo(baseTokenInfo);
-
-        if (fixedProductMarketMakers.quoteTokenMarket) {
-          const quoteTokenAddress = fixedProductMarketMakers.quoteTokenMarket.collateralToken.toLowerCase();
-          const quoteTokenContract = await getERC20Info(web3, quoteTokenAddress);
-          const quoteTokenInfo = {
-            address: quoteTokenAddress,
-            checksumAddress: web3.utils.toChecksumAddress(quoteTokenAddress),
-            name: quoteTokenContract.name, 
-            symbol: quoteTokenContract.symbol,
-            fixedProductMarketMakers: quoteTokenMarket,
-            outcomeTokenMarginalPrices: fixedProductMarketMakers.quoteTokenMarket.outcomeTokenMarginalPrices,
-            price: await getTokenPairPrice(quoteTokenAddress, baseTokenAddress),
-          }; 
-          setQuoteTokenInfo(quoteTokenInfo);
-        }
-      }
-    }    
-
     useEffect(() => {
+      const fetchTokenInfo = async () => {
+        if (fixedProductMarketMakers.baseTokenMarket) {
+          const baseTokenAddress = fixedProductMarketMakers.baseTokenMarket.collateralToken.toLowerCase();
+          const baseTokenContract = await getERC20Info(web3, baseTokenAddress);
+          const baseTokenInfo = {
+            address: baseTokenAddress,
+            checksumAddress: web3.utils.toChecksumAddress(baseTokenAddress),
+            name: baseTokenContract.name, 
+            symbol: baseTokenContract.symbol,
+            fixedProductMarketMakers: baseTokenMarket,
+            outcomeTokenMarginalPrices: fixedProductMarketMakers.baseTokenMarket.outcomeTokenMarginalPrices
+          };
+          setBaseTokenInfo(baseTokenInfo);
+  
+          if (fixedProductMarketMakers.quoteTokenMarket) {
+            const quoteTokenAddress = fixedProductMarketMakers.quoteTokenMarket.collateralToken.toLowerCase();
+            const quoteTokenContract = await getERC20Info(web3, quoteTokenAddress);
+            const quoteTokenInfo = {
+              address: quoteTokenAddress,
+              checksumAddress: web3.utils.toChecksumAddress(quoteTokenAddress),
+              name: quoteTokenContract.name, 
+              symbol: quoteTokenContract.symbol,
+              fixedProductMarketMakers: quoteTokenMarket,
+              outcomeTokenMarginalPrices: fixedProductMarketMakers.quoteTokenMarket.outcomeTokenMarginalPrices,
+              price: await getTokenPairPrice(quoteTokenAddress, baseTokenAddress),
+            }; 
+            setQuoteTokenInfo(quoteTokenInfo);
+          }
+        }
+        setLoading(false);
+      }
+      if (fixedProductMarketMakers) {
+        fetchTokenInfo();
+      }
       const fullPath = window.location.search.substring(1);
       const qArray = fullPath.split('=');
       if (qArray[0] === 'space') {
         setUrl(qArray[1])
       }  
-    }, []);
+    }, [fixedProductMarketMakers, baseTokenInfo, quoteTokenInfo]);
 
     const { loadingQuery, error, data } = useQuery(OMEN_SUBGRAPH_QUERY, {
       variables: {
@@ -147,10 +149,7 @@ const Embed = () => {
 
     if (loadingQuery) return 'Loading...';
     if (error) return <Error error={error} />;
-    if (!baseTokenInfo) {
-      fetchTokenInfo(data);
-      setLoading(false);
-    }
+    setFixedProductMarketMakers(data);
 
     return !loading && (
       <div id="app" className={`details ${url} width-full height-full`}>
