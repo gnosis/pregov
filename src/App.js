@@ -17,7 +17,7 @@ function App() {
                     <Route path='/' exact>
                         <Home />
                     </Route>
-                    <Route path='/embed/:id/:baseToken/:quoteToken' exact>
+                    <Route path='/embed/:baseTokenMarket/:quoteTokenMarket' exact>
                         <Embed />
                     </Route>
                 </Switch>
